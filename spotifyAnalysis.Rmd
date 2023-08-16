@@ -25,6 +25,7 @@ library(wordcloud2) #install.packages(")
 library(githubinstall)
 library(gganimate)
 library(animation)
+library(gridExtra)
 ```
 
 ```{r, include=FALSE}
@@ -36,7 +37,7 @@ summary(top5000)
 
 ## Intro {.build}
 
-Questo studio di dati andrà ad analizzare quella che è la classifica dei top 5000 album nel mondo. Utilizzeremo un dataset trovato su Kaggle, basato sulle classifiche di Spotify.<br />
+Questo studio di dati andrà ad analizzare quella che è la classifica dei top 5000 album nel mondo. Utilizzeremo un dataset trovato su [kaggle](https://www.kaggle.com/datasets/lucascantu/top-5000-albums-of-all-time-spotify-features), basato sulle classifiche di Spotify.
 
 ## Spotify {.build}
 
@@ -60,34 +61,42 @@ Questo studio verterà l'analisi della top 5000 album più venduti e riprodotti 
 
 -   Vedere quali sono le fasce di anni in cui sono presenti più album in classifica
 
--   E tanto altro...
-
 ## Quali sono gli artisti più presenti nella Top? {.build}
 
-Di seguito troviamo un grafico rappresentante i 10 aritisti presenti più volte nella classifica.
+Di seguito troviamo un grafico rappresentante i 10 artisti presenti più volte nella classifica.
 
 ```{r results='asis'}
- #Conteggio degli artisti
- conteggio_artisti <- table(top5000$ars_name)
- 
- # Seleziona i 10 artisti più frequenti
- top_10_artisti <- head(sort(conteggio_artisti, decreasing = TRUE), 10)
- 
- # Crea un data frame per i dati del grafico
- dati_grafico <- data.frame(Artista = names(top_10_artisti), Frequenza = as.numeric(top_10_artisti))
- 
- # Crea il grafico a barre
- grafico <- ggplot(data = dati_grafico, aes(x = Artista, y = Frequenza)) +
-     geom_bar(stat = "identity", fill = "skyblue") +
-     xlab("Artista") +
-     ylab("Frequenza") +
-     ggtitle("Top 10 Artisti più frequenti") +
-     theme_bw() +
-     theme(axis.text.x = element_text(angle = 45, hjust = 1))
- 
+# Elimino "Various Artists"
+artist <- top5000 %>%
+  filter(ars_name != "Various Artists")
+
+# Conteggio degli artisti
+conteggio_artisti <- table(artist$ars_name)
+
+# Seleziona i 10 artisti più frequenti
+top_10_artisti <- head(sort(conteggio_artisti, decreasing = TRUE), 10)
+
+# Crea un data frame per i dati del grafico
+dati_grafico <- data.frame(Artista = names(top_10_artisti), Frequenza = as.numeric(top_10_artisti))
+
+# Ordina i dati in ordine decrescente di frequenza
+dati_grafico <- dati_grafico %>%
+  arrange(desc(Frequenza))
+
+# Crea il grafico a barre
+grafico <- ggplot(data = dati_grafico, aes(x = reorder(Artista, -Frequenza), y = Frequenza)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  xlab("Artista") +
+  ylab("Frequenza") +
+  ggtitle("Top 10 Artisti più frequenti") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 # Visualizza il grafico
- print(grafico)
+print(grafico)
+
 ```
+Nel dataset analizzato era presente anche "Various Artists", ma non è stato preso in considerazione perché non rappresenta un artista in particolare ma un insieme di artisti, non sempre gli stessi, quindi non è un dato preciso.
 
 ## Anno più produttivo {.build}
 
@@ -149,18 +158,21 @@ top_generi <- conteggio_generi[1:num_generi_visualizzati]
 # Calcola le percentuali dei generi
 percentuali_generi <- round(prop.table(top_generi) * 100, 1)
 
-# Crea il grafico a torta dei generi più utilizzati
-pie(top_generi, labels = names(top_generi), main = "Generi musicali più utilizzati", cex.main = 2)
+# Vettore di colori personalizzati
+colori_personalizzati <- c("#FF9999", "#66B2FF", "#99FF99", "#FFCC99", "#CC99FF", "#FFD700", "#33ECCC", "#FF6347", "#8A2BE2", "#FF1493")
 
-# Posiziona la legenda in un angolo appropriato del grafico
-legend("bottomleft", legend = paste(names(top_generi), "(", percentuali_generi, "%)", sep = ""), fill = rainbow(length(top_generi)), cex = 0.5)
+# Crea il grafico a torta dei generi più utilizzati con colori personalizzati
+pie_chart <- pie(top_generi, labels = paste(names(top_generi), "(", percentuali_generi, "%)", sep = ""), 
+                 col = colori_personalizzati, cex.main = 2, cex = 1.2)
+
+
 ```
 
 ## Durata media degli Album nei Decenni {.build}
 
 ```{r, results = 'asis'}
 
-top5000$decennio <- floor(year(top5000$rel_date)/10)*10
+top5000$decennio <- floor(year(top5000$rel_date)/5)*5
 
 top5000$duration_ms <- top5000$duration_ms/60000
 
@@ -188,26 +200,26 @@ wordcloud2(frequenza_desc, size = 0.5, shape = 'triangle', color = 'random-light
 
 ## Apprezzamento del pubblico {.build}
 
+
 Andiamo a vedere come è variato il rating degli album nel tempo.
 
 ```{r results='asis'}
-# Crea il grafico base
+# Crea il grafico boxplot
 
-p <- ggplot(data = top5000, aes(x = rel_date, y = avg_rat)) +
-    geom_point(shape = 4, color = "red", size = 3) +
-    shadow_mark(color = "black", size = 3, alpha = 0.5) +
+
+top5000$decennio <- floor(year(top5000$rel_date)/10)*10
+
+p <- ggplot(data = top5000, aes(x = as.factor(decennio), y = avg_rat)) +
+    geom_boxplot(fill = "lightblue", color = "black") +
     xlab("Anno") +
     ylab("Rating") +
-    labs(title = 'Rating medio nel corso degli anni') +
-    transition_time(rel_date)
-
-animate(p, renderer = gifski_renderer(loop = FALSE))
-anim_save("rating.gif")
+    labs(title = 'Distribuzione del Rating nel corso degli anni')
+print(p)
 ```
 
-# Miles Davis
+# Miles Davis 
 
-## Miles Davis viaggia nei sottogeneri del jazz
+## Miles Davis viaggia nei sottogeneri del jazz {.build}
 
 ```{r results='asis'}
 davis  <- top5000 %>%
@@ -224,31 +236,58 @@ conteggio_generi <- table(generi_vettore)
 wordcloud2(conteggio_generi, size = 0.5, shape = 'diamond', color = 'random-light', background = "black")
 ```
 
-## Andiamo a vedere le caratteristiche dei suoi album
+## Andiamo a vedere le caratteristiche dei suoi album {.build}
 
-Quanto sono ballabili?
-![](danceability.gif)
+Quanto sono ballabili? 
 
-## Andiamo a vedere le caratteristiche dei suoi album
+```{r, result='asis'}
+davis_danceability <- data.frame(Album = davis$album, Danceability = davis$danceability)
+grafico2 <- ggplot(davis_danceability, aes(x = Album, y = Danceability, group=1)) +
+    geom_line(color = "blue") +
+    geom_point(color = "black") +
+    xlab("Album") +
+    ylab("Quanto è ballabile?") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+print(grafico2)
+```
+
+## Andiamo a vedere le caratteristiche dei suoi album {.build}
 
 Si possono eseguire dal vivo?
 
-![](acousticness.gif)
+```{r, result='asis'}
+davis_acousticness <- data.frame(Album = davis$album, Acousticness = davis$acousticness)
+grafico2 <- ggplot(davis_acousticness, aes(x = Album, y = Acousticness, group=1)) +
+    geom_line(color = "blue") +
+    geom_point(color = "black") +
+    xlab("Album") +
+    ylab("Quanto è eseguibile in live?") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+print(grafico2)
+```
 
-## Andiamo a vedere le caratteristiche dei suoi album
+## Andiamo a vedere le caratteristiche dei suoi album {.build}
 
 Quanta energia trasmettono?
 
-![](energy.gif)
+```{r, result='asis'}
+davis_energy <- data.frame(Album = davis$album, Energy = davis$energy)
+grafico2 <- ggplot(davis_energy, aes(x = Album, y = Energy, group=1)) +
+    geom_line(color = "blue") +
+    geom_point(color = "black") +
+    xlab("Album") +
+    ylab("Energia?") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+print(grafico2)
+```
 
 # Conclusioni
 
-## Per gli album
+## Per gli album{.build}
+
 Abbiamo capito che il genere più ascoltato è il cantautorato, che gli anni più produttivi sono stati gli anni '70 e che la maggior parte dei cantanti sono uomini,  
 L'artista più presente nella top è Miles Davis, con ben 17 album.
-
-## Per Miles Davis
 La nostra analisi ha fatto emergere le sfumature della musica di Davis, che spaziava nei sottogeneri del jazz, andando a creare per la maggiorparte album orecchiabili e dinamici, predisposti per il ballo, non sempre per suonare dal vivo.
-
-## Fonti 
-Il dataset da cui ho attinto le mie informazioni si può trovare su [kaggle](https://www.kaggle.com/datasets/lucascantu/top-5000-albums-of-all-time-spotify-features): https://www.kaggle.com/datasets/lucascantu/top-5000-albums-of-all-time-spotify-features
