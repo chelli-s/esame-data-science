@@ -4,7 +4,6 @@ author: "Samir Chelli 159255"
 date: "2023-05-30"
 output:
   ioslides_presentation:
-    logo: logo.jpg
     css: style.css
     incremental: yes
 editor_options: 
@@ -37,7 +36,9 @@ summary(top5000)
 
 ## Intro {.build}
 
-Questo studio di dati andrà ad analizzare quella che è la classifica dei top 5000 album nel mondo. Utilizzeremo un dataset trovato su [kaggle](https://www.kaggle.com/datasets/lucascantu/top-5000-albums-of-all-time-spotify-features), basato sulle classifiche di Spotify.
+Analizziamo la classifica mondiale dei top 5000 album musicali. Utilizzeremo un dataset trovato su [kaggle](https://www.kaggle.com/datasets/lucascantu/top-5000-albums-of-all-time-spotify-features), basato sulle classifiche di Spotify.
+
+
 
 ## Spotify {.build}
 
@@ -60,6 +61,8 @@ Questo studio verterà l'analisi della top 5000 album più venduti e riprodotti 
 -   Vedere quali sono gli artisti che appaiono più volte nella classifica
 
 -   Vedere quali sono le fasce di anni in cui sono presenti più album in classifica
+
+-   Analizzare la musica dell'artista più presente
 
 ## Quali sono gli artisti più presenti nella Top? {.build}
 
@@ -87,7 +90,7 @@ dati_grafico <- dati_grafico %>%
 grafico <- ggplot(data = dati_grafico, aes(x = reorder(Artista, -Frequenza), y = Frequenza)) +
   geom_bar(stat = "identity", fill = "skyblue") +
   xlab("Artista") +
-  ylab("Frequenza") +
+  ylab("Numero di album presenti") +
   ggtitle("Top 10 Artisti più frequenti") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -96,11 +99,12 @@ grafico <- ggplot(data = dati_grafico, aes(x = reorder(Artista, -Frequenza), y =
 print(grafico)
 
 ```
-Nel dataset analizzato era presente anche "Various Artists", ma non è stato preso in considerazione perché non rappresenta un artista in particolare ma un insieme di artisti, non sempre gli stessi, quindi non è un dato preciso.
+
+Escludiamo la voce Various Artists.
 
 ## Anno più produttivo {.build}
 
-Andiamo a visualizzare un grafico che ci permetta di vedere l'andamento della produzione degli album nel corso dei decenni.
+Analisi temporale della produttività musicale.
 
 ```{r results='asis'}
 
@@ -168,7 +172,7 @@ pie_chart <- pie(top_generi, labels = paste(names(top_generi), "(", percentuali_
 
 ```
 
-## Durata media degli Album nei Decenni {.build}
+## Durata media degli album nei decenni {.build}
 
 ```{r, results = 'asis'}
 
@@ -182,13 +186,13 @@ media_durata_decennio <- aggregate(duration_ms ~ decennio, data = top5000, FUN =
 grafico_durata <- ggplot(media_durata_decennio, aes(x = decennio, y = duration_ms)) +
     geom_line(color = "orange") +
     geom_point(color = "darkred") +
-    xlab("Decennio") +
+    xlab("Anno") +
     ylab("Durata Media (min)") +
     ggtitle("Durata Media degli Album per Decennio")
 grafico_durata
 ```
 
-## Descrizioni più usate {.build}
+## Keyword maggiormente presenti nelle descrizioni {.build}
 
 ```{r, results = 'asis'}
 descrizione_lista <- strsplit(top5000$descs, ",")
@@ -200,24 +204,24 @@ wordcloud2(frequenza_desc, size = 0.5, shape = 'triangle', color = 'random-light
 
 ## Apprezzamento del pubblico {.build}
 
-
 Andiamo a vedere come è variato il rating degli album nel tempo.
 
 ```{r results='asis'}
 # Crea il grafico boxplot
 
 
-top5000$decennio <- floor(year(top5000$rel_date)/10)*10
+top5000$decennio <- floor(year(top5000$rel_date)/5)*5
 
 p <- ggplot(data = top5000, aes(x = as.factor(decennio), y = avg_rat)) +
     geom_boxplot(fill = "lightblue", color = "black") +
-    xlab("Anno") +
+    geom_smooth() +
+    xlab("Decennio") +
     ylab("Rating") +
-    labs(title = 'Distribuzione del Rating nel corso degli anni')
+    labs(title = 'Distribuzione del rating nel corso degli anni')
 print(p)
 ```
 
-# Miles Davis 
+# Miles Davis
 
 ## Miles Davis viaggia nei sottogeneri del jazz {.build}
 
@@ -236,9 +240,9 @@ conteggio_generi <- table(generi_vettore)
 wordcloud2(conteggio_generi, size = 0.5, shape = 'diamond', color = 'random-light', background = "black")
 ```
 
-## Andiamo a vedere le caratteristiche dei suoi album {.build}
+## Miles Davis: Ballabilità {.build}
 
-Quanto sono ballabili? 
+Con ballabilità si intende la predispozione delle canzoni ad essere usate in sale da ballo o discoteche.
 
 ```{r, result='asis'}
 davis_danceability <- data.frame(Album = davis$album, Danceability = davis$danceability)
@@ -246,13 +250,13 @@ grafico2 <- ggplot(davis_danceability, aes(x = Album, y = Danceability, group=1)
     geom_line(color = "blue") +
     geom_point(color = "black") +
     xlab("Album") +
-    ylab("Quanto è ballabile?") +
+    ylab("Indice di ballabilità") +
     theme_bw() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 print(grafico2)
 ```
 
-## Andiamo a vedere le caratteristiche dei suoi album {.build}
+## Miles Davis: Live performance {.build}
 
 Si possono eseguire dal vivo?
 
@@ -262,13 +266,13 @@ grafico2 <- ggplot(davis_acousticness, aes(x = Album, y = Acousticness, group=1)
     geom_line(color = "blue") +
     geom_point(color = "black") +
     xlab("Album") +
-    ylab("Quanto è eseguibile in live?") +
+    ylab("Indice di predisposizione ai live") +
     theme_bw() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 print(grafico2)
 ```
 
-## Andiamo a vedere le caratteristiche dei suoi album {.build}
+## Miles Davis: Energia {.build}
 
 Quanta energia trasmettono?
 
@@ -278,16 +282,24 @@ grafico2 <- ggplot(davis_energy, aes(x = Album, y = Energy, group=1)) +
     geom_line(color = "blue") +
     geom_point(color = "black") +
     xlab("Album") +
-    ylab("Energia?") +
+    ylab("Energia") +
     theme_bw() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 print(grafico2)
 ```
 
+
+
 # Conclusioni
 
-## Per gli album{.build}
+## Conclusioni {.build}
 
-Abbiamo capito che il genere più ascoltato è il cantautorato, che gli anni più produttivi sono stati gli anni '70 e che la maggior parte dei cantanti sono uomini,  
-L'artista più presente nella top è Miles Davis, con ben 17 album.
-La nostra analisi ha fatto emergere le sfumature della musica di Davis, che spaziava nei sottogeneri del jazz, andando a creare per la maggiorparte album orecchiabili e dinamici, predisposti per il ballo, non sempre per suonare dal vivo.
+Lo studio ha trovato le risposte alle domande che sono state poste:
+
+-   Il genere più ascoltato è il cantautorato, sebbene anche il rock nei suoi sottogeneri è molto presente.
+
+-   Tra gli artisti più presenti in classifica spicca Miles Davis, oltre a nomi conosciuti da tutti come Bob Dylan e i Beatles.
+
+-   Tra la metà degli anni '60 e la metà degli anni '70 c'è stato il picco di produzione musicale, arrivando a superare i 600 album presenti in classifica.
+
+-   Miles Davis ha prodotto musica jazz, spaziando anche nella musica per cinema, dando origine ad album orecchiabili e dinamici, predisposti per il ballo ma non sempre per l'esecuzione dal vivo.

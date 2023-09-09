@@ -1,10 +1,13 @@
+
+
 slides > slide {
   overflow-y: auto !important;
+  counter-reset: slide-number;
 }
 
 slides > slide:not(.nobackground):after {
-  content: '';
+  content: counter-increment;
 }
 img{width: 100%}
-Footer
+
 © 2022 GitHub, Inc.
