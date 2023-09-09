@@ -62,7 +62,7 @@ Questo studio verterà l'analisi della top 5000 album più venduti e riprodotti 
 
 -   Vedere quali sono le fasce di anni in cui sono presenti più album in classifica
 
--   Analizzare la musica dell'artista più presente
+-   Analizzare la musica dell'artista più presente: generi che suona e altre caratteristiche
 
 ## Quali sono gli artisti più presenti nella Top? {.build}
 
