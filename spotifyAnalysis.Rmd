@@ -36,7 +36,7 @@ summary(top5000)
 
 ## Intro {.build}
 
-Analizziamo la classifica mondiale dei top 5000 album musicali. Utilizzeremo un dataset trovato su [kaggle](https://www.kaggle.com/datasets/lucascantu/top-5000-albums-of-all-time-spotify-features), basato sulle classifiche di Spotify.
+Analizziamo la classifica mondiale dei top 5000 album musicali. Utilizziamo un dataset trovato su [kaggle](https://www.kaggle.com/datasets/lucascantu/top-5000-albums-of-all-time-spotify-features), basato sulle classifiche di Spotify.
 
 
 
@@ -54,7 +54,7 @@ Ad Aprile 2023 conta oltre 515 milioni di utenti, di cui oltre 200 milioni usano
 
 ## Cosa andremo ad analizzare? {.build}
 
-Questo studio verterà l'analisi della top 5000 album più venduti e riprodotti al mondo, gli obiettivi sono:
+Gli obiettivi dello studio sono principalmente:
 
 -   Confrontare i generi degli album
 
