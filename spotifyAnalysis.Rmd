@@ -56,17 +56,17 @@ Ad Aprile 2023 conta oltre 515 milioni di utenti, di cui oltre 200 milioni usano
 
 Gli obiettivi dello studio sono principalmente:
 
--   Confrontare i generi degli album
-
 -   Vedere quali sono gli artisti che appaiono più volte nella classifica
 
 -   Vedere quali sono le fasce di anni in cui sono presenti più album in classifica
+
+-   Confrontare i generi degli album
 
 -   Analizzare la musica dell'artista più presente: generi che suona e altre caratteristiche
 
 ## Quali sono gli artisti più presenti nella Top? {.build}
 
-Di seguito troviamo un grafico rappresentante i 10 artisti presenti più volte nella classifica.
+Di seguito troviamo un grafico rappresentante i 10 artisti presenti più volte nella classifica [1] .
 
 ```{r results='asis'}
 # Elimino "Various Artists"
@@ -99,8 +99,7 @@ grafico <- ggplot(data = dati_grafico, aes(x = reorder(Artista, -Frequenza), y =
 print(grafico)
 
 ```
-
-Escludiamo la voce Various Artists.
+[1]: Escludiamo la voce **Various Artists**.
 
 ## Anno più produttivo {.build}
 
@@ -172,7 +171,7 @@ pie_chart <- pie(top_generi, labels = paste(names(top_generi), "(", percentuali_
 
 ```
 
-## Durata media degli album nei decenni {.build}
+## Durata media delle canzoni negli anni {.build}
 
 ```{r, results = 'asis'}
 
@@ -187,8 +186,7 @@ grafico_durata <- ggplot(media_durata_decennio, aes(x = decennio, y = duration_m
     geom_line(color = "orange") +
     geom_point(color = "darkred") +
     xlab("Anno") +
-    ylab("Durata Media (min)") +
-    ggtitle("Durata Media degli Album per Decennio")
+    ylab("Durata Media (min)")
 grafico_durata
 ```
 
