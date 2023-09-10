@@ -235,7 +235,16 @@ generi_vettore <- unlist(generi_lista)
 generi_vettore <- trimws(generi_vettore)
 # Conta la frequenza di ciascun genere
 conteggio_generi <- table(generi_vettore)
-wordcloud2(conteggio_generi, size = 0.5, shape = 'diamond', color = 'random-light', background = "black")
+#wordcloud2(conteggio_generi, size = 0.5, shape = 'diamond', color = 'random-light', background = "black")
+# Calcola le percentuali dei generi
+percentuali_generi <- round(prop.table(conteggio_generi) * 100, 1)
+
+# Vettore di colori personalizzati
+colori_personalizzati <- c("#FF9999", "#66B2FF", "#99FF99", "#FFCC99", "#CC99FF", "#FFD700", "#33ECCC", "#FF6347", "#8A2BE2", "#FF1493")
+
+# Crea il grafico a torta dei generi più utilizzati con colori personalizzati
+pie_chart <- pie(conteggio_generi, labels = paste(names(conteggio_generi), "(", percentuali_generi, "%)", sep = ""), 
+                 col = colori_personalizzati, cex.main = 2, cex = 1.2)
 ```
 
 ## Miles Davis: Ballabilità {.build}
@@ -243,8 +252,14 @@ wordcloud2(conteggio_generi, size = 0.5, shape = 'diamond', color = 'random-ligh
 Con ballabilità si intende la predispozione delle canzoni ad essere usate in sale da ballo o discoteche.
 
 ```{r, result='asis'}
+
 davis_danceability <- data.frame(Album = davis$album, Danceability = davis$danceability)
-grafico2 <- ggplot(davis_danceability, aes(x = Album, y = Danceability, group=1)) +
+
+davis_danceability <- davis_danceability %>%
+  arrange(desc(Danceability))
+
+
+grafico2 <- ggplot(davis_danceability, aes(x = reorder(Album, -Danceability), y = Danceability, group=1)) +
     geom_line(color = "blue") +
     geom_point(color = "black") +
     xlab("Album") +
